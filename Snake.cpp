@@ -1,19 +1,24 @@
 #include <iostream>
 #include "Snake.h"
 
-Snake::Snake(int boardSize) : boardSize(boardSize), snakeHead({boardSize/2, boardSize/2}), direction(Direction::Up), speed(1), gameEnd(false){
+Snake::Snake(int boardWidth, int boardHeight)
+            : boardWidth(boardWidth), boardHeight(boardHeight),
+              snakeHead({boardWidth/2, boardHeight/2}),
+              direction(Direction::Up),
+              speed(5) {
+
     snakeSegments.push_back(snakeHead);
     snakeSegments.push_back({snakeHead.x, snakeHead.y + 1});
     snakeSegments.push_back({snakeHead.x, snakeHead.y + 2});
 }
 
 void Snake::debugDisplay() {
-    for (int y = 0; y < boardSize; y++) {
-        for (int x = 0; x < boardSize; x++) {
+    bool isSegmentHead = false;
+    for (int y = 0; y < boardHeight; y++) {
+        for (int x = 0; x < boardWidth; x++) {
             bool isSegment = false;
-            bool isSegmentHead = false;
             for(std::size_t i=0; i < snakeSegments.size(); i++) {
-                if (snakeSegments[i].x == x && snakeSegments[i].y == y && i == 0) {
+                if (snakeHead.x == x && snakeHead.y == y && !isSegmentHead) {
                     std::cout << "S";
                     isSegment = true;
                     isSegmentHead = true;
@@ -24,32 +29,35 @@ void Snake::debugDisplay() {
             }
             if(!isSegment){
                 std::cout << ".";
-            } else if(isSegmentHead && !isSegment) {
-                std::cout << "S";
             }
         }
         std::cout << "\n";
     }
+    std::cout << "\n";
 }
 
 void Snake::move() {
     if(direction == Direction::Up){
-        SnakeSegment newHead{snakeSegments[0].x,snakeSegments[0].y-speed};
+        SnakeSegment newHead{snakeHead.x,snakeHead.y-1};
+        snakeHead = newHead;
         snakeSegments.insert(snakeSegments.begin(),newHead);
         snakeSegments.pop_back();
     }
     if(direction == Direction::Down){
-        SnakeSegment newHead{snakeSegments[0].x,snakeSegments[0].y+speed};
+        SnakeSegment newHead{snakeHead.x,snakeHead.y+1};
+        snakeHead = newHead;
         snakeSegments.insert(snakeSegments.begin(),newHead);
         snakeSegments.pop_back();
     }
     if(direction == Direction::Left){
-        SnakeSegment newHead{snakeSegments[0].x-speed,snakeSegments[0].y};
+        SnakeSegment newHead{snakeHead.x-1,snakeHead.y};
+        snakeHead = newHead;
         snakeSegments.insert(snakeSegments.begin(),newHead);
         snakeSegments.pop_back();
     }
     if(direction == Direction::Right){
-        SnakeSegment newHead{snakeSegments[0].x+speed,snakeSegments[0].y};
+        SnakeSegment newHead{snakeHead.x+1,snakeHead.y};
+        snakeHead = newHead;
         snakeSegments.insert(snakeSegments.begin(),newHead);
         snakeSegments.pop_back();
     }
@@ -97,5 +105,40 @@ void Snake::turn(Direction turn) {
         return;
     }
 
+}
+
+void Snake::grow() {
+    if(direction == Direction::Up){
+        SnakeSegment newHead{snakeHead.x,snakeHead.y-speed};
+        snakeHead = newHead;
+        snakeSegments.insert(snakeSegments.begin(),newHead);
+    }
+    if(direction == Direction::Down){
+        SnakeSegment newHead{snakeHead.x,snakeHead.y+speed};
+        snakeHead = newHead;
+        snakeSegments.insert(snakeSegments.begin(),newHead);
+    }
+    if(direction == Direction::Left){
+        SnakeSegment newHead{snakeHead.x-speed,snakeHead.y};
+        snakeHead = newHead;
+        snakeSegments.insert(snakeSegments.begin(),newHead);
+    }
+    if(direction == Direction::Right){
+        SnakeSegment newHead{snakeHead.x+speed,snakeHead.y};
+        snakeHead = newHead;
+        snakeSegments.insert(snakeSegments.begin(),newHead);
+    }
+}
+
+const std::vector<SnakeSegment> &Snake::getSnakeSegments() const {
+    return snakeSegments;
+}
+
+const SnakeSegment &Snake::getSnakeHead() const {
+    return snakeHead;
+}
+
+int Snake::getSpeed() const {
+    return speed;
 }
 

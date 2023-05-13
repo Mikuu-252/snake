@@ -16,19 +16,30 @@ enum Direction {
 };
 
 class Snake {
-    int boardSize;
+    int boardWidth;
+    int boardHeight;
     SnakeSegment snakeHead;
     std::vector<SnakeSegment> snakeSegments;
+public:
+    const std::vector<SnakeSegment> &getSnakeSegments() const;
+
+private:
     Direction direction;
     int speed;
-    bool gameEnd;
+public:
+    int getSpeed() const;
+
+    const SnakeSegment &getSnakeHead() const;
+
+private:
     void setDirection(Direction newDirection);
 
 public:
-    Snake(int boardSize);
+    Snake(int boardWidth, int boardHeight);
     void debugDisplay();
     void move();
     void turn(Direction turn);
+    void grow();
 };
 
 
