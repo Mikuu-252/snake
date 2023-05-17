@@ -20,26 +20,23 @@ class Snake {
     int boardHeight;
     SnakeSegment snakeHead;
     std::vector<SnakeSegment> snakeSegments;
-public:
-    const std::vector<SnakeSegment> &getSnakeSegments() const;
-
-private:
     Direction direction;
     int speed;
-public:
-    int getSpeed() const;
 
-    const SnakeSegment &getSnakeHead() const;
 
-private:
     void setDirection(Direction newDirection);
 
 public:
     Snake(int boardWidth, int boardHeight);
     void debugDisplay();
+
     void move();
     void turn(Direction turn);
     void grow();
+
+    const std::vector<SnakeSegment> &getSnakeSegments() const;
+    int getSpeed() const;
+    const SnakeSegment &getSnakeHead() const;
 };
 
 
