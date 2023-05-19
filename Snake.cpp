@@ -90,7 +90,7 @@ void Snake::turn(Direction turn) {
     else if(direction == Direction::Left && turn == Direction::Left){
         setDirection(Direction::Down);
     }
-    else if(direction == Direction::Left && turn == Direction::Right){
+    else {
         setDirection(Direction::Up);
     }
 
@@ -98,22 +98,22 @@ void Snake::turn(Direction turn) {
 
 void Snake::grow() {
     if(direction == Direction::Up){
-        SnakeSegment newHead{snakeHead.x,snakeHead.y-1};
+        SnakeSegment newHead{snakeHead.x,snakeHead.y};
         snakeHead = newHead;
         snakeSegments.insert(snakeSegments.begin(),newHead);
     }
     if(direction == Direction::Down){
-        SnakeSegment newHead{snakeHead.x,snakeHead.y+1};
+        SnakeSegment newHead{snakeHead.x,snakeHead.y};
         snakeHead = newHead;
         snakeSegments.insert(snakeSegments.begin(),newHead);
     }
     if(direction == Direction::Left){
-        SnakeSegment newHead{snakeHead.x-1,snakeHead.y};
+        SnakeSegment newHead{snakeHead.x,snakeHead.y};
         snakeHead = newHead;
         snakeSegments.insert(snakeSegments.begin(),newHead);
     }
     if(direction == Direction::Right){
-        SnakeSegment newHead{snakeHead.x+1,snakeHead.y};
+        SnakeSegment newHead{snakeHead.x,snakeHead.y};
         snakeHead = newHead;
         snakeSegments.insert(snakeSegments.begin(),newHead);
     }

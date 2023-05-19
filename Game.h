@@ -5,7 +5,7 @@
 #include "Food.h"
 #include <SFML/Graphics.hpp>
 
-enum gameState {
+enum GameState {
     Menu,
     RunningGame,
     EndGame
@@ -29,16 +29,22 @@ class Game {
     Food food;
     int maxPoints;
     int points;
-    gameState gameState;
+    GameState gameState;
     Field field;
 
 public:
     Game(int width, int height);
+    void gameController();
+
     void play();
-    void draw(sf::RenderWindow &win);
+    void drawGame(sf::RenderWindow &win);
+    void checkGameEnd();
+
     bool foodCollision();
+    bool boardCollision();
+    bool snakeCollision();
+
     void generateFood();
-    void gameEnd();
 };
 
 

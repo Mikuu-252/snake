@@ -9,7 +9,7 @@ Game::Game(int boardWidth, int boardHeight)
             food(boardWidth, boardHeight),
             maxPoints(boardWidth * boardHeight),
             points(3),
-            gameState(gameState::RunningGame) {
+            gameState(GameState::RunningGame) {
     //Field
     field.borderSize = 5;
     field.fieldSize = 20;
@@ -25,7 +25,7 @@ Game::Game(int boardWidth, int boardHeight)
 
 }
 
-void Game::play() {
+void Game::gameController() {
     sf::RenderWindow win(sf::VideoMode(((boardWidth)*(field.borderSize+field.fieldSize)), ((boardHeight)*(field.borderSize+field.fieldSize))), "Snake");
     win.setFramerateLimit(snake.getSpeed());
 
@@ -37,42 +37,38 @@ void Game::play() {
             if (event.type == sf::Event::Closed)
                 win.close();
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            {
-                snake.turn(Direction::Left);
+            //Game controls
+            if (gameState == GameState::RunningGame) {
+                if (event.type == sf::Event::KeyPressed) {
+                    if (event.key.code == sf::Keyboard::Left) {
+                        snake.turn(Direction::Left);
+                    }
+
+                    if (event.key.code == sf::Keyboard::Right) {
+                        snake.turn(Direction::Right);
+                    }
             }
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            {
-                snake.turn(Direction::Right);
             }
         }
 
-        //Debug!
-        snake.debugDisplay();
-        std::cout << food.getX();
-        std::cout << food.getY();
-
-        snake.move();
-
-        if(foodCollision()) {
-            generateFood();
-            points++;
-        }
-
-        gameEnd();
-
-        if (gameState == gameState::EndGame){
-            std::cout << "koniec";
+        if (gameState == GameState::RunningGame) {
+            play();
         }
 
         win.clear();
-        draw(win);
+
+        if (gameState == GameState::RunningGame){
+            drawGame(win);
+        }
+
+
         win.display();
     }
+
 }
 
-void Game::draw(sf::RenderWindow &win) {
+void Game::drawGame(sf::RenderWindow &win) {
     bool isSegmentHead = false;
     field.rectangle.setPosition(field.borderSize,field.borderSize);
 
@@ -116,8 +112,16 @@ void Game::draw(sf::RenderWindow &win) {
 
 bool Game::foodCollision() {
     if (snake.getSnakeHead().x == food.getX() && snake.getSnakeHead().y == food.getY()) {
-        snake.grow();
         return true;
+    }
+    return false;
+}
+
+bool Game::snakeCollision() {
+    for(std::size_t i=1; i < snake.getSnakeSegments().size(); i++) {
+        if (snake.getSnakeSegments()[i].x == snake.getSnakeHead().x && snake.getSnakeSegments()[i].y == snake.getSnakeHead().y) {
+            return true;
+        }
     }
     return false;
 }
@@ -131,8 +135,48 @@ void Game::generateFood() {
     }
 }
 
-void Game::gameEnd() {
+bool Game::boardCollision() {
+    if (snake.getSnakeHead().x < 0 || snake.getSnakeHead().x > boardWidth ||
+        snake.getSnakeHead().y < 0 || snake.getSnakeHead().y > boardHeight) {
+        return true;
+    }
+    return false;
+}
+
+void Game::checkGameEnd() {
     if (points == maxPoints) {
-        gameState = gameState::EndGame;
+        gameState = GameState::EndGame;
+    } else if(boardCollision()) {
+        gameState = GameState::EndGame;
+    } else if(snakeCollision()) {
+        gameState = GameState::EndGame;
+    } else {
+        gameState = GameState::RunningGame;
     }
 }
+
+void Game::play() {
+
+    //Debug!
+    snake.debugDisplay();
+    std::cout << food.getX();
+    std::cout << food.getY();
+
+
+    snake.move();
+
+    checkGameEnd();
+
+    //Collisions
+    if(foodCollision()) {
+        generateFood();
+        snake.grow();
+        points++;
+    }
+
+
+    if (gameState == GameState::EndGame){
+        std::cout << "koniec";
+    }
+}
+
