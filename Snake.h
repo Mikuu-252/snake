@@ -30,6 +30,8 @@ public:
     Snake(int boardWidth, int boardHeight);
     void debugDisplay();
 
+    void setSpeed(int speed);
+
     void move();
     void turn(Direction turn);
     void grow();

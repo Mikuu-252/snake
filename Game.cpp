@@ -5,11 +5,13 @@
 
 Game::Game(int boardWidth, int boardHeight)
           : boardWidth(boardWidth), boardHeight(boardHeight),
+            menuWidth(400), menuHeight(600),
             snake(boardWidth, boardHeight),
             food(boardWidth, boardHeight),
             maxPoints(boardWidth * boardHeight),
             points(3),
-            gameState(GameState::Menu) {
+            gameState(GameState::Menu),
+            gameDifficulty(GameDifficulty::Normal) {
 
     //Field
     field.borderSize = 5;
@@ -25,16 +27,40 @@ Game::Game(int boardWidth, int boardHeight)
     field.rectangle.setOutlineThickness(field.borderSize);
 
     //Button
-    button.borderSize = 5;
-    button.sizeX = 100;
+    button.scaleX = boardWidth*(field.borderSize+field.fieldSize) / menuWidth;
+    button.scaleY = boardHeight*(field.borderSize+field.fieldSize) / menuHeight;
+    button.sizeX = 200;
     button.sizeY = 50;
+    button.buttonSpace = 15;
     button.fillColor = sf::Color::White;
     button.borderColor = sf::Color::Green;
+    button.rectangle.setSize(sf::Vector2f(button.sizeX * button.scaleX, button.sizeY  * button.scaleY));
 
+    //Font
+    if (!fontTitle.loadFromFile("SnakeFont.otf"))
+    {
+        std::cout << "Font title load error";
+    }
+    if (!fontMenu.loadFromFile("Righteous.ttf"))
+    {
+        std::cout << "Font menu load error";
+    }
 
+    //Title
+    textTitle.setFont(fontTitle);
+    fontTitleColor = sf::Color::Green;
+    textTitle.setString("Snake");
+    textTitle.setCharacterSize(160);
+    textTitle.setFillColor(fontTitleColor);
+
+    //Text menu
+    fontMenuColor = sf::Color::Black;
+    textMenu.setFont(fontMenu);
+    textMenu.setCharacterSize(button.sizeY * 0.6);
+    textMenu.setStyle(sf::Text::Bold);
+    textMenu.setFillColor(fontMenuColor);
     button.rectangle.setFillColor(button.fillColor);
     button.rectangle.setOutlineColor(button.borderColor);
-    //button.rectangle.setOutlineThickness(button.borderSize);
 
 }
 
@@ -50,17 +76,26 @@ void Game::gameController() {
             if (event.type == sf::Event::Closed)
                 win.close();
 
+            //Menu controls
+            if (gameState == GameState::Menu) {
+                inputMenu(event, win);
+            }
+
             //Game controls
             if (gameState == GameState::RunningGame) {
                 inputsGame(event);
             }
-
 
         }
 
         if (gameState == GameState::RunningGame) {
             play();
         }
+
+        if (gameState == GameState::Menu) {
+            win.setSize((sf::Vector2u(menuWidth, menuHeight)));
+        }
+
 
         win.clear();
 
@@ -114,11 +149,11 @@ bool Game::boardCollision() {
 
 void Game::checkGameEnd() {
     if (points == maxPoints) {
-        gameState = GameState::EndGame;
+        gameState = GameState::Menu;
     } else if(boardCollision()) {
-        gameState = GameState::EndGame;
+        gameState = GameState::Menu;
     } else if(snakeCollision()) {
-        gameState = GameState::EndGame;
+        gameState = GameState::Menu;
     } else {
         gameState = GameState::RunningGame;
     }
@@ -194,15 +229,90 @@ void Game::inputsGame(sf::Event &event) {
     }
 }
 
-void Game::menu() {
-
-}
-
 void Game::drawMenu(sf::RenderWindow &win) {
-    //win.setSize((sf::Vector2u(400, 600)));
-    button.rectangle.setSize(sf::Vector2f(150.f, 50.f));
 
-    button.rectangle.setPosition(200,300);
-    win.draw(button.rectangle);
+    //Title
+    textTitle.setPosition(((((menuWidth-button.sizeX) * button.scaleX)/2)), 20);
+
+    win.draw(textTitle);
+
+    for (int i = 0; i < 3; i++) {
+        button.rectangle.setPosition((((menuWidth-button.sizeX) * button.scaleX)/2),
+                                     (((menuHeight-button.sizeY)/2 * button.scaleY)+(((button.buttonSpace + button.sizeY)*button.scaleY)*i)));
+
+        textMenu.setPosition((((menuWidth+button.sizeX) * button.scaleX)/5),
+                         ((((menuHeight-button.sizeY)/2 * button.scaleY)+(((button.buttonSpace + button.sizeY)*button.scaleY)*i)))+10);
+
+
+
+        if(i == 0){
+            textMenu.setString("NOWA GRA");
+        } else if (i == 1) {
+            if(gameDifficulty == GameDifficulty::Easy) {
+                textMenu.setString("LATWY");
+            } else if (gameDifficulty == GameDifficulty::Normal) {
+                textMenu.setString("NORMALNY");
+            } else {
+                textMenu.setString("TRUDNY");
+            }
+        } else if (i == 2) {
+            textMenu.setString("EKRAN WYNIKOW");
+        }
+
+        win.draw(button.rectangle);
+        win.draw(textMenu);
+    }
+
 }
 
+void Game::newGame(sf::RenderWindow &win) {
+    win.setFramerateLimit(snake.getSpeed());
+    snake = Snake(boardWidth, boardHeight);
+    food = Food(boardWidth, boardHeight);
+    points = 3;
+    gameState = GameState::RunningGame;
+    win.setSize(sf::Vector2u((boardWidth)*(field.borderSize+field.fieldSize), (boardHeight)*(field.borderSize+field.fieldSize)));
+
+
+}
+
+void Game::inputMenu(sf::Event &event, sf::RenderWindow &win) {
+    if (event.type == sf::Event::MouseButtonPressed)
+    {
+        if (event.mouseButton.button == sf::Mouse::Left)
+        {
+            std::cout << "the right button was pressed" << std::endl;
+            std::cout << "mouse x: " << event.mouseButton.x << std::endl;
+            std::cout << "mouse y: " << event.mouseButton.y << std::endl;
+
+            if(event.mouseButton.x > (menuWidth-button.sizeX)/2 && event.mouseButton.x < (menuWidth+button.sizeX)/2) {
+                if(event.mouseButton.y > (menuHeight-button.sizeY)/2 && event.mouseButton.y < (menuHeight+button.sizeY)/2) {
+                    newGame(win);
+                }
+
+                if(event.mouseButton.y > (button.buttonSpace + button.sizeY)+((menuHeight-button.sizeY)/2) && event.mouseButton.y < (button.buttonSpace + button.sizeY)+((menuHeight+button.sizeY)/2)) {
+                    changeDifficulty();
+                }
+
+                if(event.mouseButton.y > 2*(button.buttonSpace + button.sizeY)+((menuHeight-button.sizeY)/2) && event.mouseButton.y < 2*(button.buttonSpace + button.sizeY)+((menuHeight+button.sizeY)/2)) {
+                    gameState = GameState::Menu;
+                }
+            }
+
+        }
+    }
+}
+
+void Game::changeDifficulty() {
+    if(gameDifficulty == GameDifficulty::Easy) {
+        gameDifficulty = GameDifficulty::Normal;
+        snake.setSpeed(6);
+    } else if (gameDifficulty == GameDifficulty::Normal) {
+        gameDifficulty = GameDifficulty::Hard;
+        snake.setSpeed(8);
+
+    } else {
+        gameDifficulty = GameDifficulty::Easy;
+        snake.setSpeed(4);
+    }
+}

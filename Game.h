@@ -5,10 +5,16 @@
 #include "Food.h"
 #include <SFML/Graphics.hpp>
 
-enum GameState {
+enum class GameState {
     Menu,
     RunningGame,
     EndGame
+};
+
+enum class GameDifficulty {
+    Easy,
+    Normal,
+    Hard
 };
 
 struct Field {
@@ -26,7 +32,9 @@ struct Button {
     sf::RectangleShape rectangle;
     float sizeX;
     float sizeY;
-    float borderSize;
+    float scaleX;
+    float scaleY;
+    float buttonSpace;
     sf::Color fillColor;
     sf::Color borderColor;
 };
@@ -34,13 +42,25 @@ struct Button {
 class Game {
     int boardWidth;
     int boardHeight;
+    int menuWidth;
+    int menuHeight;
+
     Snake snake;
     Food food;
     int maxPoints;
     int points;
     GameState gameState;
+    GameDifficulty gameDifficulty;
+
     Field field;
     Button button;
+    sf::Font fontTitle;
+    sf::Font fontMenu;
+    sf::Text textTitle;
+    sf::Text textMenu;
+    sf::Color fontMenuColor;
+    sf::Color fontTitleColor;
+
 
 public:
     Game(int width, int height);
@@ -51,8 +71,10 @@ public:
     void inputsGame(sf::Event &event);
     void checkGameEnd();
 
-    void menu();
     void drawMenu(sf::RenderWindow &win);
+    void inputMenu(sf::Event &event, sf::RenderWindow &win);
+    void newGame(sf::RenderWindow &win);
+    void changeDifficulty();
 
     bool foodCollision();
     bool boardCollision();

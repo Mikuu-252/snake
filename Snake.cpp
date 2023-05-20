@@ -5,7 +5,7 @@ Snake::Snake(int boardWidth, int boardHeight)
             : boardWidth(boardWidth), boardHeight(boardHeight),
               snakeHead({boardWidth/2, boardHeight/2}),
               direction(Direction::Up),
-              speed(5) {
+              speed(6) {
 
     snakeSegments.push_back(snakeHead);
     snakeSegments.push_back({snakeHead.x, snakeHead.y + 1});
@@ -68,32 +68,29 @@ void Snake::setDirection(Direction newDirection) {
 }
 
 void Snake::turn(Direction turn) {
-
-    if(direction == Direction::Up && turn == Direction::Left){
-        setDirection(Direction::Left);
+    if (turn == Direction::Left) {
+        // Turn Left
+        if (direction == Direction::Up) {
+            setDirection(Direction::Left);
+        } else if (direction == Direction::Right) {
+            setDirection(Direction::Up);
+        } else if (direction == Direction::Down) {
+            setDirection(Direction::Right);
+        } else if (direction == Direction::Left) {
+            setDirection(Direction::Down);
+        }
+    } else if (turn == Direction::Right) {
+        // Turn Right
+        if (direction == Direction::Up) {
+            setDirection(Direction::Right);
+        } else if (direction == Direction::Right) {
+            setDirection(Direction::Down);
+        } else if (direction == Direction::Down) {
+            setDirection(Direction::Left);
+        } else if (direction == Direction::Left) {
+            setDirection(Direction::Up);
+        }
     }
-    else if(direction == Direction::Up && turn == Direction::Right){
-        setDirection(Direction::Right);
-    }
-    else if(direction == Direction::Right && turn == Direction::Left){
-        setDirection(Direction::Up);
-    }
-    else if(direction == Direction::Right && turn == Direction::Right){
-        setDirection(Direction::Down);
-    }
-    else if(direction == Direction::Down && turn == Direction::Left){
-        setDirection(Direction::Right);
-    }
-    else if(direction == Direction::Down && turn == Direction::Right){
-        setDirection(Direction::Left);
-    }
-    else if(direction == Direction::Left && turn == Direction::Left){
-        setDirection(Direction::Down);
-    }
-    else {
-        setDirection(Direction::Up);
-    }
-
 }
 
 void Snake::grow() {
@@ -129,5 +126,9 @@ const SnakeSegment &Snake::getSnakeHead() const {
 
 int Snake::getSpeed() const {
     return speed;
+}
+
+void Snake::setSpeed(int speed) {
+    Snake::speed = speed;
 }
 
