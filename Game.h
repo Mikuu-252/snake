@@ -22,6 +22,15 @@ struct Field {
     sf::Color foodColor;
 };
 
+struct Button {
+    sf::RectangleShape rectangle;
+    float sizeX;
+    float sizeY;
+    float borderSize;
+    sf::Color fillColor;
+    sf::Color borderColor;
+};
+
 class Game {
     int boardWidth;
     int boardHeight;
@@ -31,6 +40,7 @@ class Game {
     int points;
     GameState gameState;
     Field field;
+    Button button;
 
 public:
     Game(int width, int height);
@@ -38,7 +48,11 @@ public:
 
     void play();
     void drawGame(sf::RenderWindow &win);
+    void inputsGame(sf::Event &event);
     void checkGameEnd();
+
+    void menu();
+    void drawMenu(sf::RenderWindow &win);
 
     bool foodCollision();
     bool boardCollision();
