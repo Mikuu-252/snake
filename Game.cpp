@@ -1,11 +1,14 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <windows.h>
+#include <fstream>
+#include <sstream>
+
 #include "Game.h"
 
 Game::Game(int boardWidth, int boardHeight)
           : boardWidth(boardWidth), boardHeight(boardHeight),
             menuWidth(400), menuHeight(600),
+            scoreWidth(400), scoreHeight(600),
             snake(boardWidth, boardHeight),
             food(boardWidth, boardHeight),
             maxPoints(boardWidth * boardHeight),
@@ -62,6 +65,9 @@ Game::Game(int boardWidth, int boardHeight)
     button.rectangle.setFillColor(button.fillColor);
     button.rectangle.setOutlineColor(button.borderColor);
 
+    //Load scores
+    loadScores();
+
 }
 
 void Game::gameController() {
@@ -81,6 +87,11 @@ void Game::gameController() {
                 inputMenu(event, win);
             }
 
+            //Score board controls
+            if (gameState == GameState::Menu) {
+                inputScoreBoard(event, win);
+            }
+
             //Game controls
             if (gameState == GameState::RunningGame) {
                 inputsGame(event);
@@ -88,23 +99,38 @@ void Game::gameController() {
 
         }
 
+
+        //Game
         if (gameState == GameState::RunningGame) {
             play();
         }
 
+        //Menu
         if (gameState == GameState::Menu) {
             win.setSize((sf::Vector2u(menuWidth, menuHeight)));
+        }
+
+        //Score board
+        if (gameState == GameState::EndGame) {
+            win.setSize((sf::Vector2u(scoreWidth, scoreHeight)));
         }
 
 
         win.clear();
 
+        //Draw menu
         if (gameState == GameState::Menu){
             drawMenu(win);
         }
 
+        //Draw game
         if (gameState == GameState::RunningGame){
             drawGame(win);
+        }
+
+        //Score board
+        if (gameState == GameState::EndGame) {
+            drawScoreBoard(win);
         }
 
 
@@ -149,11 +175,17 @@ bool Game::boardCollision() {
 
 void Game::checkGameEnd() {
     if (points == maxPoints) {
-        gameState = GameState::Menu;
+        updateScores();
+        saveScores();
+        gameState = GameState::EndGame;
     } else if(boardCollision()) {
-        gameState = GameState::Menu;
+        updateScores();
+        saveScores();
+        gameState = GameState::EndGame;
     } else if(snakeCollision()) {
-        gameState = GameState::Menu;
+        updateScores();
+        saveScores();
+        gameState = GameState::EndGame;
     } else {
         gameState = GameState::RunningGame;
     }
@@ -236,14 +268,13 @@ void Game::drawMenu(sf::RenderWindow &win) {
 
     win.draw(textTitle);
 
+    //Text menu
     for (int i = 0; i < 3; i++) {
         button.rectangle.setPosition((((menuWidth-button.sizeX) * button.scaleX)/2),
                                      (((menuHeight-button.sizeY)/2 * button.scaleY)+(((button.buttonSpace + button.sizeY)*button.scaleY)*i)));
 
         textMenu.setPosition((((menuWidth+button.sizeX) * button.scaleX)/5),
                          ((((menuHeight-button.sizeY)/2 * button.scaleY)+(((button.buttonSpace + button.sizeY)*button.scaleY)*i)))+10);
-
-
 
         if(i == 0){
             textMenu.setString("NOWA GRA");
@@ -281,10 +312,6 @@ void Game::inputMenu(sf::Event &event, sf::RenderWindow &win) {
     {
         if (event.mouseButton.button == sf::Mouse::Left)
         {
-            std::cout << "the right button was pressed" << std::endl;
-            std::cout << "mouse x: " << event.mouseButton.x << std::endl;
-            std::cout << "mouse y: " << event.mouseButton.y << std::endl;
-
             if(event.mouseButton.x > (menuWidth-button.sizeX)/2 && event.mouseButton.x < (menuWidth+button.sizeX)/2) {
                 if(event.mouseButton.y > (menuHeight-button.sizeY)/2 && event.mouseButton.y < (menuHeight+button.sizeY)/2) {
                     newGame(win);
@@ -295,7 +322,7 @@ void Game::inputMenu(sf::Event &event, sf::RenderWindow &win) {
                 }
 
                 if(event.mouseButton.y > 2*(button.buttonSpace + button.sizeY)+((menuHeight-button.sizeY)/2) && event.mouseButton.y < 2*(button.buttonSpace + button.sizeY)+((menuHeight+button.sizeY)/2)) {
-                    gameState = GameState::Menu;
+                    gameState = GameState::EndGame;
                 }
             }
 
@@ -314,5 +341,97 @@ void Game::changeDifficulty() {
     } else {
         gameDifficulty = GameDifficulty::Easy;
         snake.setSpeed(4);
+    }
+}
+
+void Game::drawScoreBoard(sf::RenderWindow &win) {
+
+
+
+    //Buttons
+    for (int i = 0; i < 2; i++) {
+        button.rectangle.setPosition((((i*button.sizeX) * button.scaleX)),
+                                     (((menuHeight-button.sizeY) * button.scaleY))+10);
+
+        textMenu.setPosition((((i*button.sizeX) * button.scaleX)+80),
+                             (((menuHeight-button.sizeY) * button.scaleY))+10);
+
+        if(i == 0){
+            textMenu.setString("WRÓC");
+        } else {
+            if(gameDifficulty == GameDifficulty::Easy) {
+                textMenu.setString("LATWY");
+            } else if (gameDifficulty == GameDifficulty::Normal) {
+                textMenu.setString("NORMALNY");
+            } else {
+                textMenu.setString("TRUDNY");
+            }
+        }
+
+        win.draw(button.rectangle);
+        win.draw(textMenu);
+    }
+}
+
+void Game::inputScoreBoard(sf::Event &event, sf::RenderWindow &win) {
+
+}
+
+void Game::updateScores() {
+    if (gameDifficulty == GameDifficulty::Easy) {
+        if (points > scores.easy[9]) {
+            scores.easy[9] = points;
+            std::sort(scores.easy, scores.easy + 10, std::greater<int>());
+        }
+    } else if (gameDifficulty == GameDifficulty::Normal) {
+        if (points > scores.normal[9]) {
+            scores.normal[9] = points;
+            std::sort(scores.normal, scores.normal + 10, std::greater<int>());
+        }
+    } else {
+        if (points > scores.hard[9]) {
+            scores.hard[9] = points;
+            std::sort(scores.hard, scores.hard + 10, std::greater<int>());
+        }
+    }
+}
+
+
+void Game::saveScores() {
+    std::ofstream file("scores.txt");
+    if(file) {
+        for (int i = 0; i < 10; ++i) {
+            file << scores.easy[i] << "\n";
+        }
+        for (int i = 0; i < 10; ++i) {
+            file << scores.normal[i] << "\n";
+        }
+        for (int i = 0; i < 10; ++i) {
+            file << scores.hard[i] << "\n";
+        }
+    }
+    file.close();
+}
+
+void Game::loadScores() {
+    std::ifstream file("scores.txt");
+    std::string line;
+
+    for (int i = 0; i < 10; ++i) {
+        std::getline(file, line);
+        std::istringstream issline(line);
+        issline >> scores.easy[i];
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        std::getline(file, line);
+        std::istringstream issline(line);
+        issline >> scores.normal[i];
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        std::getline(file, line);
+        std::istringstream issline(line);
+        issline >> scores.hard[i];
     }
 }

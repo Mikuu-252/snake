@@ -17,6 +17,12 @@ enum class GameDifficulty {
     Hard
 };
 
+struct Scores {
+    int easy[10];
+    int normal[10];
+    int hard[10];
+};
+
 struct Field {
     sf::RectangleShape rectangle;
     float fieldSize;
@@ -44,6 +50,8 @@ class Game {
     int boardHeight;
     int menuWidth;
     int menuHeight;
+    int scoreWidth;
+    int scoreHeight;
 
     Snake snake;
     Food food;
@@ -61,26 +69,38 @@ class Game {
     sf::Color fontMenuColor;
     sf::Color fontTitleColor;
 
+    Scores scores;
+
 
 public:
     Game(int width, int height);
     void gameController();
 
+    //Game
     void play();
     void drawGame(sf::RenderWindow &win);
     void inputsGame(sf::Event &event);
     void checkGameEnd();
-
-    void drawMenu(sf::RenderWindow &win);
-    void inputMenu(sf::Event &event, sf::RenderWindow &win);
-    void newGame(sf::RenderWindow &win);
-    void changeDifficulty();
+    void generateFood();
 
     bool foodCollision();
     bool boardCollision();
     bool snakeCollision();
 
-    void generateFood();
+    //Menu
+    void drawMenu(sf::RenderWindow &win);
+    void inputMenu(sf::Event &event, sf::RenderWindow &win);
+    void newGame(sf::RenderWindow &win);
+    void changeDifficulty();
+
+    //Score board
+    void drawScoreBoard(sf::RenderWindow &win);
+    void inputScoreBoard(sf::Event &event, sf::RenderWindow &win);
+    void updateScores();
+    void saveScores();
+    void loadScores();
+
+
 };
 
 
