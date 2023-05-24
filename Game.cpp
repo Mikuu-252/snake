@@ -88,7 +88,7 @@ void Game::gameController() {
             }
 
             //Score board controls
-            if (gameState == GameState::Menu) {
+            if (gameState == GameState::EndGame) {
                 inputScoreBoard(event, win);
             }
 
@@ -345,19 +345,41 @@ void Game::changeDifficulty() {
 }
 
 void Game::drawScoreBoard(sf::RenderWindow &win) {
+    //Text
+    const int* score = nullptr;
+    if (gameDifficulty == GameDifficulty::Easy) {
+        score = scores.easy;
+    } else if (gameDifficulty == GameDifficulty::Normal) {
+        score = scores.normal;
+    } else {
+        score = scores.hard;
+    }
 
+    textMenu.setFillColor(sf::Color::White);
+    textMenu.setCharacterSize(40);
+    textMenu.setPosition(20, 40);
+    textMenu.setString("Najlepsze wyniki:");
+    win.draw(textMenu);
+
+    for (int i = 0; i < 10; ++i) {
+        textMenu.setPosition(20, 100 + i * 40);
+        textMenu.setString(std::to_string(i + 1) + ".   " + std::to_string(score[i]));
+        win.draw(textMenu);
+    }
+    textMenu.setCharacterSize(button.sizeY * 0.6);
+    textMenu.setFillColor(fontMenuColor);
 
 
     //Buttons
     for (int i = 0; i < 2; i++) {
         button.rectangle.setPosition((((i*button.sizeX) * button.scaleX)),
-                                     (((menuHeight-button.sizeY) * button.scaleY))+10);
+                                     (menuHeight-button.sizeY)*button.scaleY);
 
         textMenu.setPosition((((i*button.sizeX) * button.scaleX)+80),
-                             (((menuHeight-button.sizeY) * button.scaleY))+10);
+                             (menuHeight-button.sizeY)*button.scaleY);
 
         if(i == 0){
-            textMenu.setString("WRÓC");
+            textMenu.setString("WROC");
         } else {
             if(gameDifficulty == GameDifficulty::Easy) {
                 textMenu.setString("LATWY");
@@ -374,7 +396,19 @@ void Game::drawScoreBoard(sf::RenderWindow &win) {
 }
 
 void Game::inputScoreBoard(sf::Event &event, sf::RenderWindow &win) {
-
+    if (event.type == sf::Event::MouseButtonPressed)
+    {
+        if (event.mouseButton.button == sf::Mouse::Left)
+        {
+            if(event.mouseButton.y > (menuHeight-button.sizeY)) {
+                if (event.mouseButton.x < (button.sizeX * button.scaleX)/1.5) {
+                    gameState = GameState::Menu;
+                } else {
+                    changeDifficulty();
+                }
+            }
+        }
+    }
 }
 
 void Game::updateScores() {
