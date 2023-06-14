@@ -18,9 +18,9 @@ enum class GameDifficulty {
 };
 
 struct Scores {
-    int easy[10];
-    int normal[10];
-    int hard[10];
+    int easy[10]{0};
+    int normal[10]{0};
+    int hard[10]{0};
 };
 
 struct Field {

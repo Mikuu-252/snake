@@ -40,11 +40,11 @@ Game::Game(int boardWidth, int boardHeight)
     button.rectangle.setSize(sf::Vector2f(button.sizeX * button.scaleX, button.sizeY  * button.scaleY));
 
     //Font
-    if (!fontTitle.loadFromFile("SnakeFont.otf"))
+    if (!fontTitle.loadFromFile("../SnakeFont.otf"))
     {
         std::cout << "Font title load error";
     }
-    if (!fontMenu.loadFromFile("Righteous.ttf"))
+    if (!fontMenu.loadFromFile("../Righteous.ttf"))
     {
         std::cout << "Font menu load error";
     }
