@@ -166,8 +166,8 @@ void Game::generateFood() {
 }
 
 bool Game::boardCollision() {
-    if (snake.getSnakeHead().x < 0 || snake.getSnakeHead().x > boardWidth ||
-        snake.getSnakeHead().y < 0 || snake.getSnakeHead().y > boardHeight) {
+    if (snake.getSnakeHead().x < 0 || snake.getSnakeHead().x >= boardWidth ||
+        snake.getSnakeHead().y < 0 || snake.getSnakeHead().y >= boardHeight) {
         return true;
     }
     return false;
