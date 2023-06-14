@@ -21,6 +21,7 @@ struct Scores {
     int easy[10]{0};
     int normal[10]{0};
     int hard[10]{0};
+
 };
 
 struct Field {
@@ -95,7 +96,7 @@ public:
 
     //Score board
     void drawScoreBoard(sf::RenderWindow &win);
-    void inputScoreBoard(sf::Event &event, sf::RenderWindow &win);
+    void inputScoreBoard(sf::Event &event);
     void updateScores();
     void saveScores();
     void loadScores();

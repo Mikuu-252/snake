@@ -89,7 +89,7 @@ void Game::gameController() {
 
             //Score board controls
             if (gameState == GameState::EndGame) {
-                inputScoreBoard(event, win);
+                inputScoreBoard(event);
             }
 
             //Game controls
@@ -395,7 +395,7 @@ void Game::drawScoreBoard(sf::RenderWindow &win) {
     }
 }
 
-void Game::inputScoreBoard(sf::Event &event, sf::RenderWindow &win) {
+void Game::inputScoreBoard(sf::Event &event) {
     if (event.type == sf::Event::MouseButtonPressed)
     {
         if (event.mouseButton.button == sf::Mouse::Left)
